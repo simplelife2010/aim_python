@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>aim_ops module &mdash; AIM-TensorFlow 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="AIM-TensorFlow 0.1 documentation" href="index.html"/>
+        <link rel="next" title="cluster module" href="cluster.html"/>
+        <link rel="prev" title="Welcome to tf’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> AIM-TensorFlow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">aim_ops module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster.html">cluster module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rate_features.html">rate_features module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test_aim_ops.html">test_aim_ops module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">AIM-TensorFlow</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>aim_ops module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/aim_ops.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-aim_ops">
+<span id="aim-ops-module"></span><h1>aim_ops module<a class="headerlink" href="#module-aim_ops" title="Permalink to this headline">¶</a></h1>
+<p>AIM-specific TensorFlow operations</p>
+<dl class="function">
+<dt id="aim_ops.extract_features">
+<code class="descclassname">aim_ops.</code><code class="descname">extract_features</code><span class="sig-paren">(</span><em>frames</em>, <em>sample_rate</em>, <em>lower_edge_hertz</em>, <em>upper_edge_hertz</em>, <em>sfr_length=1024</em>, <em>sfr_step=512</em>, <em>n_mel_bins=128</em>, <em>n_mfcc=20</em>, <em>p=2.0</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#extract_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.extract_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract a batch of features from a batch of audio signals.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+sample_rate: Python float. Samples per second of the input signal used to
+create the spectrogram. We need this to figure out the actual frequencies
+for each spectrogram bin, which dictates how they are mapped into the mel
+scale.
+lower_edge_hertz: Python float. Lower bound on the frequencies to be
+included in the mel spectrum. This corresponds to the lower edge of the
+lowest triangular band.
+upper_edge_hertz: Python float. The desired top edge of the highest
+frequency band.
+sfr_length: An integer scalar <cite>Tensor</cite>. The subframe length in samples.
+sfr_step: An integer scalar <cite>Tensor</cite>. The number of samples to step.
+n_mel_bins: An integer scalar <cite>Tensor</cite>. The number of mel bins to
+calculate.
+n_mfcc: An integer scalar <cite>Tensor</cite>. The number of mfcc to calculate.
+p: Power to raise deviation from spectral centroid.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> containing the features.
+A <cite>Tensor</cite> containing the feature ids.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.log_mel_spectrogram">
+<code class="descclassname">aim_ops.</code><code class="descname">log_mel_spectrogram</code><span class="sig-paren">(</span><em>mag_spectrogram</em>, <em>sample_rate</em>, <em>lower_edge_hertz</em>, <em>upper_edge_hertz</em>, <em>n_mel_bins=128</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#log_mel_spectrogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.log_mel_spectrogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate log mel spectrograms from a batch of magnitude spectrograms.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>mag_spectrogram: A <cite>Tensor</cite> of shape <cite>[frames, spectrogram_bins]</cite>.
+n_mel_bins: An integer scalar <cite>Tensor</cite>. The number of mel bins to
+calculate.
+sample_rate: Python float. Samples per second of the input signal used to
+create the spectrogram. We need this to figure out the actual frequencies
+for each spectrogram bin, which dictates how they are mapped into the mel
+scale.
+lower_edge_hertz: Python float. Lower bound on the frequencies to be
+included in the mel spectrum. This corresponds to the lower edge of the
+lowest triangular band.
+upper_edge_hertz: Python float. The desired top edge of the highest
+frequency band.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with shape <cite>[frames, mel_bins]</cite>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.mag_spectrogram">
+<code class="descclassname">aim_ops.</code><code class="descname">mag_spectrogram</code><span class="sig-paren">(</span><em>frames</em>, <em>fft_length=1024</em>, <em>fft_step=512</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#mag_spectrogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.mag_spectrogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract magnitude spectrograms from a batch of audio signals.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+fft_length: An integer scalar <cite>Tensor</cite>. The window length in samples.
+fft_step: An integer scalar <cite>Tensor</cite>. The number of samples to step.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with shape <cite>[frames, spectrogram_bins]</cite>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.mfcc">
+<code class="descclassname">aim_ops.</code><code class="descname">mfcc</code><span class="sig-paren">(</span><em>log_mel_spectrogram</em>, <em>n_mfcc=20</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#mfcc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.mfcc" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Calculate mel frequency cepstral coefficients from a batch of log mel</dt>
+<dd>spectrograms.</dd>
+<dt>Args:</dt>
+<dd>log_mel_spectrogram: A <cite>Tensor</cite> of shape <cite>[frames, mel_bins]</cite>.
+n_mfcc: The number of coefficients to extract.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with shape <cite>[frames, n_mfcc]</cite> containing the mfccs.
+A <cite>Tensor</cite> with shape <cite>[n_mfcc]</cite> containing the feature ids.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.normalize_audio">
+<code class="descclassname">aim_ops.</code><code class="descname">normalize_audio</code><span class="sig-paren">(</span><em>frames</em>, <em>attenuation</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#normalize_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.normalize_audio" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Normalize a batch of audio signals by removing dc offset and applying</dt>
+<dd>rms normalization.</dd>
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+attenuation: <cite>float32</cite>, the attenuation in decibel.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with the same shape as the input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.normalize_features">
+<code class="descclassname">aim_ops.</code><code class="descname">normalize_features</code><span class="sig-paren">(</span><em>features</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#normalize_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.normalize_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize a batch of features to zero mean, unit variance.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>features: A <cite>Tensor</cite> of shape <cite>[frames, features]</cite>.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> of shape <cite>[frames, features]</cite>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.read_audio">
+<code class="descclassname">aim_ops.</code><code class="descname">read_audio</code><span class="sig-paren">(</span><em>file_pattern</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#read_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.read_audio" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Read next audio file matching filename patterns and return decoded audio</dt>
+<dd>using an iterator.</dd>
+<dt>Args:</dt>
+<dd><p class="first">file_pattern: A string or scalar string <cite>Tensor</cite>, representing the
+filename pattern that will be matched.</p>
+<p class="last">name: <cite>string</cite>, name of the operation.</p>
+</dd>
+<dt>Returns:</dt>
+<dd>An initializer operation for the iterator
+A <cite>Tensor</cite> containing the name of the decoded file.
+A <cite>Tensor</cite> containing the decoded audio.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.read_ground_truth_labels">
+<code class="descclassname">aim_ops.</code><code class="descname">read_ground_truth_labels</code><span class="sig-paren">(</span><em>audio_filename</em>, <em>fr_length</em>, <em>sample_rate</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#read_ground_truth_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.read_ground_truth_labels" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Read the corresponding ground truth labels file for the given audio file.</dt>
+<dd>For an audio filename <cite>test.wav</cite> the ground truth filename is expected to be
+<cite>test.gt</cite>.</dd>
+<dt>Args:</dt>
+<dd>audio_filename: A string or scalar string <cite>Tensor</cite>, containing the audio
+filename.
+fr_length: An integer scalar <cite>Tensor</cite>. The window length in samples.
+sample_rate: Python float. Samples per second of the input signal used to
+create the spectrogram. We need this to figure out the actual frequencies
+for each spectrogram bin, which dictates how they are mapped into the mel
+scale.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> containing the labels.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.reduce_features">
+<code class="descclassname">aim_ops.</code><code class="descname">reduce_features</code><span class="sig-paren">(</span><em>features</em>, <em>feature_ids</em>, <em>mean=True</em>, <em>variance=True</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#reduce_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.reduce_features" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Reduce a batch of features along the time axis for each frame, calculating</dt>
+<dd>mean, variance etc.</dd>
+<dt>Args:</dt>
+<dd>features: A <cite>Tensor</cite> of shape <cite>[frames, subframes, features]</cite>.
+feature_ids: A <cite>Tensor</cite> containing the feature ids.
+mean: <cite>bool</cite>, if <cite>true</cite>, calculate the mean.
+variance: <cite>bool</cite>, if <cite>true</cite>, calculate the variance.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> of shape <cite>[frames, reduce operations * features]</cite>.
+A <cite>Tensor</cite> containing the reduced feature ids.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.remove_dc">
+<code class="descclassname">aim_ops.</code><code class="descname">remove_dc</code><span class="sig-paren">(</span><em>frames</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#remove_dc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.remove_dc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove dc offset from a batch of audio signals.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with the same shape as the input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.scale">
+<code class="descclassname">aim_ops.</code><code class="descname">scale</code><span class="sig-paren">(</span><em>frames</em>, <em>attenuation</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#scale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale a batch of audio signals using root mean square normalization.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+attenuation: <cite>float32</cite>, the attenuation in decibel.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with the same shape as the input.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.spectral_centroid_bandwidth">
+<code class="descclassname">aim_ops.</code><code class="descname">spectral_centroid_bandwidth</code><span class="sig-paren">(</span><em>mag_spectrogram</em>, <em>sample_rate</em>, <em>p</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#spectral_centroid_bandwidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.spectral_centroid_bandwidth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Calculate the logarithmized spectral centroid from a batch of magnitude</dt>
+<dd>spectrograms.</dd>
+<dt>Args:</dt>
+<dd>mag_spectrogram: A <cite>Tensor</cite> of shape <cite>[frames, spectrogram_bins]</cite>.
+sample_rate: Python float. Samples per second of the input signal.
+p: Power to raise deviation from spectral centroid.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with shape <cite>[frames, 1]</cite> containing the spectral centroid.
+A <cite>Tensor</cite> with shape <cite>[1]</cite> containing the feature id.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="aim_ops.zero_crossing_rate">
+<code class="descclassname">aim_ops.</code><code class="descname">zero_crossing_rate</code><span class="sig-paren">(</span><em>frames</em>, <em>sfr_length=1024</em>, <em>sfr_step=512</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/aim_ops.html#zero_crossing_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#aim_ops.zero_crossing_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the zero crossing rate for a batch of audio signals.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>frames: A <cite>Tensor</cite> of shape <cite>[frames, samples]</cite>.
+sfr_length: An integer scalar <cite>Tensor</cite>. The subframe length in samples.
+sfr_step: An integer scalar <cite>Tensor</cite>. The number of samples to step.
+name: <cite>string</cite>, name of the operation.</dd>
+<dt>Returns:</dt>
+<dd>A <cite>Tensor</cite> with shape <cite>[frames, 1]</cite> containing the zero crossing rate.
+A <cite>Tensor</cite> with shape <cite>[1]</cite> containing the feature id.</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cluster.html" class="btn btn-neutral float-right" title="cluster module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to tf’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DB Systel GmbH.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

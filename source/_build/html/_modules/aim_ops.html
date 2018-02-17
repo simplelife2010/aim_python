@@ -1,0 +1,591 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>aim_ops &mdash; AIM-TensorFlow 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="AIM-TensorFlow 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> AIM-TensorFlow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../aim_ops.html">aim_ops module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cluster.html">cluster module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rate_features.html">rate_features module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../test_aim_ops.html">test_aim_ops module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">AIM-TensorFlow</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>aim_ops</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for aim_ops</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;AIM-specific TensorFlow operations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib.framework.python.ops</span> <span class="k">import</span> <span class="n">audio_ops</span> <span class="k">as</span> <span class="n">contrib_audio</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib</span> <span class="k">import</span> <span class="n">signal</span> <span class="k">as</span> <span class="n">contrib_signal</span>
+
+<div class="viewcode-block" id="read_audio"><a class="viewcode-back" href="../aim_ops.html#aim_ops.read_audio">[docs]</a><span class="k">def</span> <span class="nf">read_audio</span><span class="p">(</span><span class="n">file_pattern</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Read next audio file matching filename patterns and return decoded audio</span>
+<span class="sd">    using an iterator.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    file_pattern: A string or scalar string `Tensor`, representing the</span>
+<span class="sd">    filename pattern that will be matched.</span>
+<span class="sd">    </span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">	</span>
+<span class="sd">  Returns:</span>
+<span class="sd">    An initializer operation for the iterator</span>
+<span class="sd">    A `Tensor` containing the name of the decoded file.</span>
+<span class="sd">    A `Tensor` containing the decoded audio.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;read_audio&quot;</span><span class="p">):</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">list_files</span><span class="p">(</span><span class="n">file_pattern</span><span class="p">)</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="n">files</span><span class="o">.</span><span class="n">make_initializable_iterator</span><span class="p">()</span>
+    <span class="n">next_file</span> <span class="o">=</span> <span class="n">iterator</span><span class="o">.</span><span class="n">get_next</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;next_file&quot;</span><span class="p">)</span>
+    <span class="n">read_file</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">next_file</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;read_file&quot;</span><span class="p">)</span>
+    <span class="n">audio</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">contrib_audio</span><span class="o">.</span><span class="n">decode_wav</span><span class="p">(</span><span class="n">read_file</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;decode&quot;</span><span class="p">)</span>
+    <span class="n">decoded_audio</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">audio</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+      <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mixdown&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">iterator</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span>
+            <span class="n">next_file</span><span class="p">,</span></div>
+            <span class="n">decoded_audio</span><span class="p">)</span>
+            
+<div class="viewcode-block" id="read_ground_truth_labels"><a class="viewcode-back" href="../aim_ops.html#aim_ops.read_ground_truth_labels">[docs]</a><span class="k">def</span> <span class="nf">read_ground_truth_labels</span><span class="p">(</span><span class="n">audio_filename</span><span class="p">,</span> <span class="n">fr_length</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Read the corresponding ground truth labels file for the given audio file.</span>
+<span class="sd">    For an audio filename `test.wav` the ground truth filename is expected to be</span>
+<span class="sd">    `test.gt`.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    audio_filename: A string or scalar string `Tensor`, containing the audio</span>
+<span class="sd">    filename.</span>
+<span class="sd">    fr_length: An integer scalar `Tensor`. The window length in samples.</span>
+<span class="sd">    sample_rate: Python float. Samples per second of the input signal used to</span>
+<span class="sd">    create the spectrogram. We need this to figure out the actual frequencies</span>
+<span class="sd">    for each spectrogram bin, which dictates how they are mapped into the mel</span>
+<span class="sd">    scale.</span>
+<span class="sd">      </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` containing the labels.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;read_gt&quot;</span><span class="p">):</span>
+    <span class="n">split</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">string_split</span><span class="p">(</span>
+      <span class="p">[</span><span class="n">audio_filename</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">skip_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">ext_stripped</span> <span class="o">=</span> <span class="n">split</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ext_concatenated</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ext_stripped</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;gt&quot;</span><span class="p">]],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">gt_filename</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_join</span><span class="p">(</span><span class="n">ext_concatenated</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">read_file</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">gt_filename</span><span class="p">)</span>
+    <span class="c1"># Separate input file by line break (&quot;\r\n&quot;)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">string_split</span><span class="p">([</span><span class="n">read_file</span><span class="p">],</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="c1"># Decode into three columns (float, float, int)</span>
+    <span class="n">csv_columns</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">decode_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[]],</span> <span class="n">field_delim</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Get end timestamp of each segment</span>
+    <span class="n">segments</span> <span class="o">=</span> <span class="n">csv_columns</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Get labels</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">csv_columns</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="c1"># Calculate frame length in seconds</span>
+    <span class="n">fr_length_s</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">fr_length</span><span class="p">),</span> <span class="n">sample_rate</span><span class="p">)</span>
+    <span class="c1"># Convert segment timestamps into frame indices</span>
+    <span class="n">frame_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_int32</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">segments</span><span class="p">,</span> <span class="n">fr_length_s</span><span class="p">))</span>
+    <span class="c1"># Magic 1: Expand by getting a row of ones until the frame index</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sequence_mask</span><span class="p">(</span>
+      <span class="n">frame_indices</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">frame_indices</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="c1"># Magic 2: Subtract each row from the next row</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([[</span><span class="n">sm</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]],</span> <span class="n">tf</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">sm</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:],</span> <span class="n">sm</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># Magic 3: Reduce the matrix on the other axis to get labels by frame</span>
+    <span class="n">labels_by_frame</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">diff</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+  <span class="k">return</span> <span class="n">labels_by_frame</span>
+
+<div class="viewcode-block" id="remove_dc"><a class="viewcode-back" href="../aim_ops.html#aim_ops.remove_dc">[docs]</a><span class="k">def</span> <span class="nf">remove_dc</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Remove dc offset from a batch of audio signals.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with the same shape as the input.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;remove_dc&quot;</span><span class="p">):</span>
+    <span class="n">dc_offset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;dc_offset&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">dc_offset</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;remove_dc&quot;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="scale"><a class="viewcode-back" href="../aim_ops.html#aim_ops.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">attenuation</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Scale a batch of audio signals using root mean square normalization.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    attenuation: `float32`, the attenuation in decibel.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with the same shape as the input.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">):</span>
+    <span class="n">frames_rms</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">frames</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">attenuation</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
+    <span class="n">attenuation_lin</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">exponent</span><span class="p">)</span>
+    <span class="n">normalized_frames</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span>
+      <span class="n">frames</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+        <span class="n">frames_rms</span><span class="p">,</span> <span class="n">attenuation_lin</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">normalized_frames</span>
+  
+    
+<div class="viewcode-block" id="normalize_audio"><a class="viewcode-back" href="../aim_ops.html#aim_ops.normalize_audio">[docs]</a><span class="k">def</span> <span class="nf">normalize_audio</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">attenuation</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Normalize a batch of audio signals by removing dc offset and applying</span>
+<span class="sd">    rms normalization.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    attenuation: `float32`, the attenuation in decibel.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with the same shape as the input.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;norm_audio&quot;</span><span class="p">):</span>
+    <span class="n">frames_ac</span> <span class="o">=</span> <span class="n">remove_dc</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">scale</span><span class="p">(</span><span class="n">frames_ac</span><span class="p">,</span> <span class="n">attenuation</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="mag_spectrogram"><a class="viewcode-back" href="../aim_ops.html#aim_ops.mag_spectrogram">[docs]</a><span class="k">def</span> <span class="nf">mag_spectrogram</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">fft_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">fft_step</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Extract magnitude spectrograms from a batch of audio signals.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    fft_length: An integer scalar `Tensor`. The window length in samples.</span>
+<span class="sd">    fft_step: An integer scalar `Tensor`. The number of samples to step.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with shape `[frames, spectrogram_bins]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;mag_spectrogram&quot;</span><span class="p">):</span>
+    <span class="n">stft</span> <span class="o">=</span> <span class="n">contrib_signal</span><span class="o">.</span><span class="n">stft</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">fft_length</span><span class="p">,</span> <span class="n">fft_step</span><span class="p">)</span>
+    <span class="n">ms</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">stft</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">ms</span>
+    
+<div class="viewcode-block" id="log_mel_spectrogram"><a class="viewcode-back" href="../aim_ops.html#aim_ops.log_mel_spectrogram">[docs]</a><span class="k">def</span> <span class="nf">log_mel_spectrogram</span><span class="p">(</span>
+  <span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">lower_edge_hertz</span><span class="p">,</span> <span class="n">upper_edge_hertz</span><span class="p">,</span>
+  <span class="n">n_mel_bins</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculate log mel spectrograms from a batch of magnitude spectrograms.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    mag_spectrogram: A `Tensor` of shape `[frames, spectrogram_bins]`.</span>
+<span class="sd">    n_mel_bins: An integer scalar `Tensor`. The number of mel bins to</span>
+<span class="sd">    calculate.</span>
+<span class="sd">    sample_rate: Python float. Samples per second of the input signal used to</span>
+<span class="sd">    create the spectrogram. We need this to figure out the actual frequencies</span>
+<span class="sd">    for each spectrogram bin, which dictates how they are mapped into the mel</span>
+<span class="sd">    scale.</span>
+<span class="sd">    lower_edge_hertz: Python float. Lower bound on the frequencies to be</span>
+<span class="sd">    included in the mel spectrum. This corresponds to the lower edge of the</span>
+<span class="sd">    lowest triangular band.</span>
+<span class="sd">    upper_edge_hertz: Python float. The desired top edge of the highest</span>
+<span class="sd">    frequency band.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with shape `[frames, mel_bins]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;mel_spectrogram&quot;</span><span class="p">):</span>
+    <span class="n">n_spectrogram_bins</span> <span class="o">=</span> <span class="n">mag_spectrogram</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">mel_matrix</span> <span class="o">=</span> <span class="n">contrib_signal</span><span class="o">.</span><span class="n">linear_to_mel_weight_matrix</span><span class="p">(</span>
+      <span class="n">n_mel_bins</span><span class="p">,</span> <span class="n">n_spectrogram_bins</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">lower_edge_hertz</span><span class="p">,</span>
+      <span class="n">upper_edge_hertz</span><span class="p">)</span>
+    <span class="n">mel_spectrogram</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">mel_matrix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">mel_spectrogram</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+      <span class="n">mel_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]))</span>
+    <span class="n">log_offset</span> <span class="o">=</span> <span class="mf">1e-6</span>
+    <span class="n">log_mel_spectrogram</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mel_spectrogram</span> <span class="o">+</span> <span class="n">log_offset</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">log_mel_spectrogram</span>
+
+<div class="viewcode-block" id="mfcc"><a class="viewcode-back" href="../aim_ops.html#aim_ops.mfcc">[docs]</a><span class="k">def</span> <span class="nf">mfcc</span><span class="p">(</span><span class="n">log_mel_spectrogram</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculate mel frequency cepstral coefficients from a batch of log mel</span>
+<span class="sd">    spectrograms.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    log_mel_spectrogram: A `Tensor` of shape `[frames, mel_bins]`.</span>
+<span class="sd">    n_mfcc: The number of coefficients to extract.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with shape `[frames, n_mfcc]` containing the mfccs.</span>
+<span class="sd">    A `Tensor` with shape `[n_mfcc]` containing the feature ids.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;mfcc&quot;</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">n_mfcc</span><span class="p">)</span>
+    <span class="n">feature_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;mfcc_&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">contrib_signal</span><span class="o">.</span><span class="n">mfccs_from_log_mel_spectrograms</span><span class="p">(</span></div>
+      <span class="n">log_mel_spectrogram</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">n_mfcc</span><span class="p">])</span>
+    
+<div class="viewcode-block" id="spectral_centroid_bandwidth"><a class="viewcode-back" href="../aim_ops.html#aim_ops.spectral_centroid_bandwidth">[docs]</a><span class="k">def</span> <span class="nf">spectral_centroid_bandwidth</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculate the logarithmized spectral centroid from a batch of magnitude</span>
+<span class="sd">    spectrograms.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    mag_spectrogram: A `Tensor` of shape `[frames, spectrogram_bins]`.</span>
+<span class="sd">    sample_rate: Python float. Samples per second of the input signal.</span>
+<span class="sd">    p: Power to raise deviation from spectral centroid.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with shape `[frames, 1]` containing the spectral centroid.</span>
+<span class="sd">    A `Tensor` with shape `[1]` containing the feature id.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;spectral_centroid_bandwidth&quot;</span><span class="p">):</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.00000001</span>
+    <span class="n">n_spectrogram_bins</span> <span class="o">=</span> <span class="n">mag_spectrogram</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">center_frequencies</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">lin_space</span><span class="p">(</span>
+      <span class="mf">0.0</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_spectrogram_bins</span><span class="p">))</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">normalized_mag_spectrogram</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">length</span> <span class="o">+</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">weighted_spectrogram</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+      <span class="n">center_frequencies</span><span class="p">,</span> <span class="n">normalized_mag_spectrogram</span><span class="p">)</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">weighted_spectrogram</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">deviation</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+      <span class="n">tf</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">center_frequencies</span><span class="p">,</span> <span class="n">centroid</span><span class="p">))</span>
+    <span class="n">bandwidth</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">mag_spectrogram</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span>
+      <span class="n">deviation</span><span class="p">,</span> <span class="n">p</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+    <span class="n">feature_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="s2">&quot;spectral_centroid&quot;</span><span class="p">,</span> <span class="s2">&quot;spectral_bandwidth&quot;</span><span class="p">])</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">centroid</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="zero_crossing_rate"><a class="viewcode-back" href="../aim_ops.html#aim_ops.zero_crossing_rate">[docs]</a><span class="k">def</span> <span class="nf">zero_crossing_rate</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">sfr_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">sfr_step</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Calculate the zero crossing rate for a batch of audio signals.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    sfr_length: An integer scalar `Tensor`. The subframe length in samples.</span>
+<span class="sd">    sfr_step: An integer scalar `Tensor`. The number of samples to step.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` with shape `[frames, 1]` containing the zero crossing rate.</span>
+<span class="sd">    A `Tensor` with shape `[1]` containing the feature id.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;zero_crossing_rate&quot;</span><span class="p">):</span>
+    <span class="n">subframes</span> <span class="o">=</span> <span class="n">contrib_signal</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">sfr_length</span><span class="p">,</span> <span class="n">sfr_step</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">subframes</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">sign</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">:],</span> <span class="n">sign</span><span class="p">[:,:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">])),</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">n_zc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">zcr</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">n_zc</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">to_float</span><span class="p">(</span><span class="n">sfr_length</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="s2">&quot;zero_crossing_rate&quot;</span><span class="p">)],</span> <span class="n">zcr</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="extract_features"><a class="viewcode-back" href="../aim_ops.html#aim_ops.extract_features">[docs]</a><span class="k">def</span> <span class="nf">extract_features</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span>
+                     <span class="n">sample_rate</span><span class="p">,</span>
+                     <span class="n">lower_edge_hertz</span><span class="p">,</span>
+                     <span class="n">upper_edge_hertz</span><span class="p">,</span>
+                     <span class="n">sfr_length</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span>
+                     <span class="n">sfr_step</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+                     <span class="n">n_mel_bins</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                     <span class="n">n_mfcc</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                     <span class="n">p</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Extract a batch of features from a batch of audio signals.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    frames: A `Tensor` of shape `[frames, samples]`.</span>
+<span class="sd">    sample_rate: Python float. Samples per second of the input signal used to</span>
+<span class="sd">    create the spectrogram. We need this to figure out the actual frequencies</span>
+<span class="sd">    for each spectrogram bin, which dictates how they are mapped into the mel</span>
+<span class="sd">    scale.</span>
+<span class="sd">    lower_edge_hertz: Python float. Lower bound on the frequencies to be</span>
+<span class="sd">    included in the mel spectrum. This corresponds to the lower edge of the</span>
+<span class="sd">    lowest triangular band.</span>
+<span class="sd">    upper_edge_hertz: Python float. The desired top edge of the highest</span>
+<span class="sd">    frequency band.</span>
+<span class="sd">    sfr_length: An integer scalar `Tensor`. The subframe length in samples.</span>
+<span class="sd">    sfr_step: An integer scalar `Tensor`. The number of samples to step.</span>
+<span class="sd">    n_mel_bins: An integer scalar `Tensor`. The number of mel bins to</span>
+<span class="sd">    calculate.</span>
+<span class="sd">    n_mfcc: An integer scalar `Tensor`. The number of mfcc to calculate.</span>
+<span class="sd">    p: Power to raise deviation from spectral centroid.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">  </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` containing the features.</span>
+<span class="sd">    A `Tensor` containing the feature ids.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;extract_features&quot;</span><span class="p">):</span>
+    <span class="n">mag_s</span> <span class="o">=</span> <span class="n">mag_spectrogram</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">sfr_length</span><span class="p">,</span> <span class="n">sfr_step</span><span class="p">)</span>
+    <span class="n">mel_s</span> <span class="o">=</span> <span class="n">log_mel_spectrogram</span><span class="p">(</span>
+      <span class="n">mag_s</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">lower_edge_hertz</span><span class="p">,</span> <span class="n">upper_edge_hertz</span><span class="p">,</span> <span class="n">n_mel_bins</span><span class="p">)</span>
+    <span class="n">mfcc_ids</span><span class="p">,</span> <span class="n">mfccs</span> <span class="o">=</span> <span class="n">mfcc</span><span class="p">(</span><span class="n">mel_s</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="p">)</span>
+    <span class="n">scb_id</span><span class="p">,</span> <span class="n">scb</span> <span class="o">=</span> <span class="n">spectral_centroid_bandwidth</span><span class="p">(</span><span class="n">mag_s</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">zcr_id</span><span class="p">,</span> <span class="n">zcr</span> <span class="o">=</span> <span class="n">zero_crossing_rate</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">sfr_length</span><span class="p">,</span> <span class="n">sfr_step</span><span class="p">)</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">mfccs</span><span class="p">,</span> <span class="n">scb</span><span class="p">,</span> <span class="n">zcr</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">feature_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">mfcc_ids</span><span class="p">,</span> <span class="n">scb_id</span><span class="p">,</span> <span class="n">zcr_id</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="reduce_features"><a class="viewcode-back" href="../aim_ops.html#aim_ops.reduce_features">[docs]</a><span class="k">def</span> <span class="nf">reduce_features</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">feature_ids</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Reduce a batch of features along the time axis for each frame, calculating</span>
+<span class="sd">    mean, variance etc.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    features: A `Tensor` of shape `[frames, subframes, features]`.</span>
+<span class="sd">    feature_ids: A `Tensor` containing the feature ids.</span>
+<span class="sd">    mean: `bool`, if `true`, calculate the mean.</span>
+<span class="sd">    variance: `bool`, if `true`, calculate the variance.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` of shape `[frames, reduce operations * features]`.</span>
+<span class="sd">    A `Tensor` containing the reduced feature ids.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;reduce_features&quot;</span><span class="p">):</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="n">n_frames</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">features</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">moments</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">features_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span>
+                            <span class="k">lambda</span><span class="p">:</span> <span class="n">moments</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;calculate_mean&quot;</span><span class="p">)</span>
+    <span class="n">features_variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span>
+                                <span class="k">lambda</span><span class="p">:</span> <span class="n">moments</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">n_frames</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;calculate_variance&quot;</span><span class="p">)</span>
+    <span class="n">ids_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span>
+                       <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="s2">&quot;_mean&quot;</span><span class="p">)]),</span>
+                       <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">0</span><span class="p">])),</span>
+                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mean_feature_ids&quot;</span><span class="p">)</span>
+    <span class="n">ids_variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">variance</span><span class="p">,</span>
+                           <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">feature_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="s2">&quot;_variance&quot;</span><span class="p">)]),</span>
+                           <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">0</span><span class="p">])),</span>
+                           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;variance_feature_ids&quot;</span><span class="p">)</span>
+    <span class="n">reduced_features</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">features_mean</span><span class="p">,</span> <span class="n">features_variance</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">reduced_feature_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ids_mean</span><span class="p">,</span> <span class="n">ids_variance</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">reduced_features</span><span class="p">,</span> <span class="n">reduced_feature_ids</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="normalize_features"><a class="viewcode-back" href="../aim_ops.html#aim_ops.normalize_features">[docs]</a><span class="k">def</span> <span class="nf">normalize_features</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Normalize a batch of features to zero mean, unit variance.</span>
+<span class="sd">  </span>
+<span class="sd">  Args:</span>
+<span class="sd">    features: A `Tensor` of shape `[frames, features]`.</span>
+<span class="sd">    name: `string`, name of the operation.</span>
+<span class="sd">    </span>
+<span class="sd">  Returns:</span>
+<span class="sd">    A `Tensor` of shape `[frames, features]`.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">name_scope</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;norm_features&quot;</span><span class="p">):</span>
+    <span class="n">batch_mean</span><span class="p">,</span> <span class="n">batch_variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span>
+      <span class="n">features</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">keep_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">normalized_features</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span><span class="n">features</span><span class="p">,</span>
+                                                    <span class="n">batch_mean</span><span class="p">,</span>
+                                                    <span class="n">batch_variance</span><span class="p">,</span>
+                                                    <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">variance_epsilon</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span></div>
+  <span class="k">return</span> <span class="n">normalized_features</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, DB Systel GmbH.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
